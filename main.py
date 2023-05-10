@@ -1,3 +1,4 @@
+! pip install geopandas
 import pandas as pd
 import geopandas as gpd
 from mpl_toolkits.basemap import Basemap

@@ -1,7 +1,5 @@
 import pandas as pd
 import geopandas as gpd
-import pandas as pd
-import geopandas as gpd
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 import streamlit as st

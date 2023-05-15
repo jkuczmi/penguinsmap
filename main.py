@@ -1,10 +1,8 @@
-import pandas as pd
 import geopandas as gpd
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 import streamlit as st
 import numpy as np
-import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
 colors_list = ['darkorange', 'darkgreen', 'blue', 'crimson', 'darkviolet', 'yellow']
 
@@ -74,20 +72,20 @@ geodf.crs = 'epsg:4326'
 # processing
 geodf.replace('', None, inplace=True)
 geodf = geodf.dropna(subset=[YEAR, LONG, LAT, COUNT])
-geodf['year'] = geodf['year'].astype('int')
+geodf[YEAR] = geodf[YEAR].astype('int')
 geodf[COUNT] = geodf[COUNT].astype('int')
 geodf[LONG]=geodf[LONG].astype('float')
 geodf[LAT]=geodf[LAT].astype('float')
 
 st.title("Map of Penguin Colonies in Antarctica")
-st.write("Select species of penguins to display their location on the map in 1989, 1999, 2009, or 2019.")
+st.write("See locations where penguin colonies have been sighted on particular years.")
 
 years_list = [1989,1999,2009,2019]
-
+# minval=min(geodf[YEAR])
+# maxval=max(geodf[YEAR])
 selected_species=[]
-selected_species = st.multiselect("Select species", set(list(geodf[NAME])))
-selected_year = st.selectbox("Choose year", years_list)
-
+selected_species = st.multiselect("Select species of penguins to display on the map", set(list(geodf[NAME])))
+selected_year = st.selectbox("Choose year of observations from a list", years_list, index=3)
 
 fig = plt.figure(figsize=(12,10))
 st.subheader(f"Penguin colonies spotted in {selected_year}")
@@ -99,8 +97,6 @@ map = prepare_big_map()
 map=draw_south_pole(map)
 for n, specie in enumerate(selected_species):
     map = draw_map(map, df_selected[df_selected[NAME]==specie],color_temp=colors_list[n])
-
-
 
 ax = fig.add_subplot(122)
 
@@ -119,4 +115,5 @@ if len(selected_species) >0:
 
 # fig.legend(loc='outside lower center', title='outside lower center')
 st.pyplot(fig)
-st.caption("References: Dataset MAPPPD v4.1 from: https://www.penguinmap.com/mapppd/ ")
+st.caption("References: Dataset MAPPPD v4.1 from: https://www.penguinmap.com/mapppd/sources/")
+

@@ -1,4 +1,5 @@
 import geopandas as gpd
+import pandas as pd
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 import streamlit as st
@@ -77,15 +78,22 @@ geodf[COUNT] = geodf[COUNT].astype('int')
 geodf[LONG]=geodf[LONG].astype('float')
 geodf[LAT]=geodf[LAT].astype('float')
 
-st.title("Map of Penguin Colonies in Antarctica")
-st.write("See locations where penguin colonies have been sighted on particular years.")
-
+temp=pd.DataFrame(geodf[YEAR].unique()).sort_values(by=0)
 years_list = [1989,1999,2009,2019]
-# minval=min(geodf[YEAR])
-# maxval=max(geodf[YEAR])
-selected_species=[]
-selected_species = st.multiselect("Select species of penguins to display on the map", set(list(geodf[NAME])))
-selected_year = st.selectbox("Choose year of observations from a list", years_list, index=3)
+with st.sidebar:
+    st.title("Options")
+    opt = st.radio('Select year of observations from:',['A list of suggestions', 'A complete list of years'])
+    if opt == 'A list of suggestions':
+        selected_year = st.selectbox("Select year:", years_list, index=3)
+    elif opt =='A complete list of years':
+        selected_year = st.selectbox("Select year:", temp)
+
+    geodf_new=geodf[geodf[YEAR]==selected_year]
+    selected_species=[]
+    selected_species = st.multiselect("Select species of penguins to display them on the map:", set(list(geodf_new[NAME])))
+st.title("Map of Penguin Colonies in Antarctica")
+st.text("See locations where penguin colonies have been sighted on particular year.")
+
 
 fig = plt.figure(figsize=(12,10))
 st.subheader(f"Penguin colonies spotted in {selected_year}")
@@ -98,9 +106,11 @@ map=draw_south_pole(map)
 for n, specie in enumerate(selected_species):
     map = draw_map(map, df_selected[df_selected[NAME]==specie],color_temp=colors_list[n])
 
+
+
 ax = fig.add_subplot(122)
 
-ax.set_title(f"Zoom on Antarctic Peninsula")
+ax.set_title(f"Zoom on the Antarctic Peninsula")
 df_selected = geodf[geodf[YEAR]==selected_year]
 map = prepare_map()
 patches = []
@@ -108,12 +118,8 @@ for n, specie in enumerate(selected_species):
     map = draw_single(map, df_selected[df_selected[NAME]==specie],color_temp= colors_list[n])
     patch = mlines.Line2D([], [], color=colors_list[n], marker='o', linestyle='None', markersize=10, label=specie)
     patches.append(patch)
-# if len(selected_species) >0:
-#     red_patch = mpatches.Patch(color='red', label='The red data')
 if len(selected_species) >0:
     ax.legend(handles=patches,loc='upper center', bbox_to_anchor=(0.5, -0.05),  ncol=2)
 
-# fig.legend(loc='outside lower center', title='outside lower center')
 st.pyplot(fig)
 st.caption("References: Dataset MAPPPD v4.1 from: https://www.penguinmap.com/mapppd/sources/")
-
